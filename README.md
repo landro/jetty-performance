@@ -1,19 +1,111 @@
+footer: Bekk fagdag, 4. september 2015
+slidenumbers: true
+
 # Jetty Performance
+### Stefan Magnus Landrø
+---
 
-## C10k problem
-The C10k problem is the problem of optimising network sockets to handle a large number of clients at the same time. The name C10k is a numeronym for concurrently handling ten thousand connections. Note that concurrent connections are not the same as requests per second, though they are similar: handling many requests per second requires high throughput (processing them quickly), while high number of concurrent connections requires efficient scheduling of connections.
+## Jetty 
 
-## Connectors
+- Java HTTP server 
+- Java Servlet container
+- Free/libre open source 
+- Embeddable
+  - Configure in code
 
-### Jetty 7 & 8
+---
 
-#### SelectChannelConnector
-This connector uses efficient NIO buffers with a non-blocking threading model. Jetty uses Direct NIO buffers, and allocates threads only to connections with requests. Synchronization simulates blocking for the servlet API, and any unflushed content at the end of request handling is written asynchronously. See
+## Traditional Web Server Performance Metrics
 
-#### SocketConnector
-This connector implements a traditional blocking IO and threading model. Jetty uses Normal JRE sockets and allocates a thread per connection. Jetty allocates large buffers to active connections only. You should use this Connector only if NIO is not available.
+- Requests per second
+- Average Response times (std dev) 
+- (web framework performance?)
 
-### Jetty 9 
+---
 
-####  ServerConnector
-Jetty 9 has only a selector-based non blocking I/O connector
+# C10k problem
+
+- Optimising network sockets to handle a large number of clients at the same time
+- C10k = ten thousand concurrent connections
+  - Chrome 45 : 6 connections per hostname
+  - IE 11 : 13 connections per hostname
+
+---
+
+## Modern Web Server Performance Metrics
+
+- Requests per second
+- Response times (percentiles)
+- Nb of concurrent connections
+
+---
+
+# Connections and Requests
+
+- Few connections and few requests: very easy
+- Few connections and many requests: easy
+- Many connections and few requests: hard  
+- Many connections and many requests: very hard 
+
+---
+
+## Jetty 6, 7 & 8
+
+-  SocketConnector 
+  - Blocking I/O - one thread per connection
+-  SelectChannelConnector 
+  - Non blocking - threads are allocated to connections with requests
+
+---
+
+## Jetty 9 
+- ServerConnector
+  - Selector-based non blocking I/O connector
+
+---
+
+# Threaddump 
+
+```
+"qtp1296064247-19-selector-ServerConnectorManager@359cc65/1":
+  at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+  ...
+  at sun.nio.ch.SelectorImpl.select()
+  at org.eclipse.jetty.io.SelectorManager$ManagedSelector.select()
+  at org.eclipse.jetty.io.SelectorManager$ManagedSelector.run()
+
+```
+
+--- 
+
+
+```java 
+/*
+ * KQueueArrayWrapper.java (Open JDK)
+ * Implementation of Selector using FreeBSD / Mac OS X kqueues
+ * Derived from Sun's DevPollArrayWrapper
+ */
+
+package sun.nio.ch;
+
+...
+
+class KQueueArrayWrapper {
+...
+}
+``` 
+
+---
+
+# kqueue (BSD) / epoll (Linux)
+
+Scalable event notification interface in modern operating systems
+
+- Efficient I/O event pipelines between kernel and userland
+- Extremely efficient when polling for events on a large number of file descriptors (e.g. sockets)
+
+---
+
+# Jetty performance = OS performance
+
+
