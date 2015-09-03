@@ -40,15 +40,6 @@ slidenumbers: true
 
 ---
 
-# Connections and Requests
-
-- Few connections and few requests: very easy
-- Few connections and many requests: easy
-- Many connections and few requests: hard  
-- Many connections and many requests: very hard 
-
----
-
 ## Jetty 6, 7 & 8
 
 -  SocketConnector 
@@ -105,7 +96,8 @@ Scalable event notification interface in modern operating systems
 - Extremely efficient when polling for events on a large number of file descriptors (e.g. sockets)
 
 ---
+# Conclusion:
 
-# Jetty performance = OS performance
+## Jetty performance =~ OS performance
 
 
